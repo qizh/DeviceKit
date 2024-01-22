@@ -472,6 +472,8 @@ public enum Device {
     ///
     /// ![Image]()
     case appleWatchUltra2
+  #elseif os(visionOS)
+	case appleVisionPro1
   #endif
 
   /// Device is [Simulator](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/iOS_Simulator_Guide/Introduction/Introduction.html)
@@ -628,6 +630,12 @@ public enum Device {
       case "i386", "x86_64", "arm64": return simulator(mapToDevice(identifier: ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] ?? "watchOS"))
       default: return unknown(identifier)
       }
+	#elseif os(visionOS)
+	  switch identifier {
+	  case "RealityDevice14,1": return appleVisionPro1
+	  case "i386", "x86_64", "arm64": return simulator(mapToDevice(identifier: ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] ?? "visionOS"))
+	  default: return unknown(identifier)
+	  }
     #endif
   }
 
@@ -879,6 +887,8 @@ public enum Device {
       }
     #elseif os(tvOS)
       return (width: -1, height: -1)
+	#elseif os(visionOS)
+	  return (width: -1, height: -1)
     #endif
   }
 
@@ -982,7 +992,7 @@ public enum Device {
 
     public var isZoomed: Bool? {
       guard isCurrent else { return nil }
-      #if os(xrOS)
+      #if os(visionOS)
       return nil
       #else
       if Int(UIScreen.main.scale.rounded()) == 3 {
@@ -1138,6 +1148,12 @@ public enum Device {
     public var hasForceTouchSupport: Bool {
       return isOneOf(Device.allWatchesWithForceTouchSupport) || isOneOf(Device.allWatchesWithForceTouchSupport.map(Device.simulator))
     }
+  #elseif os(visionOS)
+	public static var allVisions: [Device] {
+		[
+			.appleVisionPro1,
+		]
+	}
   #endif
 
   /// Returns whether the current device is a SwiftUI preview canvas
@@ -1158,6 +1174,8 @@ public enum Device {
       return allTVs
     #elseif os(watchOS)
       return allWatches
+	#elseif os(visionOS)
+	  return allVisions
     #endif
   }
 
@@ -1385,6 +1403,8 @@ public enum Device {
     }
     #elseif os(tvOS)
     return nil
+	#elseif os(visionOS)
+	return nil
     #endif
   }
 
@@ -1403,7 +1423,7 @@ public enum Device {
 
   /// The brightness level of the screen.
   public var screenBrightness: Int {
-    #if os(iOS) && !os(xrOS)
+    #if os(iOS) && !os(visionOS)
     return Int(UIScreen.main.brightness * 100)
     #else
     return 100
@@ -1536,6 +1556,12 @@ extension Device: CustomStringConvertible {
       case .simulator(let model): return "Simulator (\(model.description))"
       case .unknown(let identifier): return identifier
       }
+	#elseif os(visionOS)
+	  switch self {
+	  case .appleVisionPro1: return "Apple Vision Pro"
+	  case .simulator(let model): return "Simulator (\(model.description))"
+	  case .unknown(let identifier): return identifier
+	  }
     #endif
   }
 
@@ -1664,6 +1690,12 @@ extension Device: CustomStringConvertible {
       case .simulator(let model): return "Simulator (\(model.safeDescription))"
       case .unknown(let identifier): return identifier
       }
+	#elseif os(visionOS)
+	  switch self {
+	  case .appleVisionPro1: return "Apple Vision Pro"
+	  case .simulator(let model): return "Simulator (\(model.safeDescription))"
+	  case .unknown(let identifier): return identifier
+	  }
     #endif
   }
 
@@ -1814,7 +1846,7 @@ extension Device.BatteryState: Comparable {
 }
 #endif
 
-#if os(iOS) && !os(xrOS)
+#if os(iOS) && !os(visionOS)
 extension Device {
   // MARK: Orientation
     /**
@@ -2172,6 +2204,8 @@ extension Device {
     case s7
     case s8
     case s9
+  #elseif os(visionOS)
+	case m2
   #endif
     case unknown
   }
@@ -2298,6 +2332,12 @@ extension Device {
       case .simulator(let model): return model.cpu
       case .unknown: return .unknown
     }
+  #elseif os(visionOS)
+	  switch self {
+	  case .appleVisionPro1: return .m2
+	  case .simulator(let model): return model.cpu
+	  case .unknown: return .unknown
+	  }
   #endif
   }
 }
@@ -2347,6 +2387,11 @@ extension Device.CPU: CustomStringConvertible {
       case .s9: return "S9"
       case .unknown: return "unknown"
     }
+  #elseif os(visionOS)
+	  switch self {
+	  case .m2: return "M2"
+	  case .unknown: return "unknown"
+	  }
   #endif
   }
 }
