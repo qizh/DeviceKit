@@ -1154,6 +1154,19 @@ public enum Device {
 			.appleVisionPro1,
 		]
 	}
+	
+	public static var allSimulatorVisions: [Device] {
+		allVisions.map(Device.simulator)
+	}
+	
+	public var isVision: Bool {
+	  (
+		   isOneOf(Device.allVisions)
+		|| isOneOf(Device.allSimulatorVisions)
+		|| (UIDevice.current.userInterfaceIdiom == .vision && isCurrent)
+	  )
+	}
+
   #endif
 
   /// Returns whether the current device is a SwiftUI preview canvas
